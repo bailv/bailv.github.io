@@ -65,7 +65,10 @@ algolia_search:
 # Please see doc for more details: https://molunerfinn.com/hexo-theme-melody-doc/#/third-party-support?id=local-search
 # ---------------
 local_search:
-  enable: false
+  enable: true
+  labels:
+    input_placeholder: 尝试搜索吧!!!
+    hits_empty: '23333333,没有找到你搜索的内容：${query}'
 
 # MathJax
 # Please see doc for more details: https://molunerfinn.com/hexo-theme-melody-doc/#/third-party-support?id=mathjax
@@ -205,13 +208,13 @@ disqus:
 # client_id:
 # client_secret:
 
-# gitalk:
-#   enable: false
-#   client_id:
-#   client_secret:
-#   repo:
-#   owner:
-#   admin:
+gitalk:
+  enable: true
+  client_id: 748d9bebd8f89c940326
+  client_secret: 90e4c408337c19b0b05dfd3f9d110e6184da9e7a
+  repo: 'https://github.com/bailv/bailv.github.io'
+  owner: bailv
+  admin: bailv
 
 # valine comment system. https://valine.js.org
 # valine:
