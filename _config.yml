@@ -88,3 +88,5 @@ deploy:
   type: git
   repository: https://access_token@github.com/bailv/bailv.github.io.git
   branch: master
+  name: bailv
+  email: bailv2019@hotmail.com
