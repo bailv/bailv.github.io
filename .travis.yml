@@ -1,0 +1,22 @@
+lanuages: node_js
+
+node_js: stable
+
+install:
+  - npm install
+
+before_script:
+  - git clone
+
+after_script:
+  - cd ./public
+  - git init
+  - git config user.name "bailv"
+  - git config user.email "bailv2019@hotmail.com"
+  - git add .
+  - git commit -m "Site update"
+  - git push --force --quiet "https://${ACESS_TOKEN}@github.com/bailv/bailv.github.io" master:master
+
+branches:
+  only:
+    - blog
