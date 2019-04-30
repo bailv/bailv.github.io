@@ -19,7 +19,7 @@ before_script:
 after_script:
   - git config user.name "bailv"
   - git config user.email "bailv2019@hotmail.com"
-  - sed -i "s/access_token/${ACCESS_TOKEN}/g" ./config.yml
+  - sed -i "s/access_token/${ACCESS_TOKEN}/g" ./_config.yml
   - hexo d
 
 branches:
