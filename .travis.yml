@@ -2,20 +2,25 @@ lanuages: node_js
 
 node_js: stable
 
+cache:
+  directories:
+    - node_modules
+
+script:
+  - hexo g
+
 install:
+  - npm install -g hexo-cli
   - npm install
 
 before_script:
-  - git clone
+  - git clone -b master https://github.com/Molunerfinn/hexo-theme-melody themes/melody
 
 after_script:
-  - cd ./public
-  - git init
   - git config user.name "bailv"
   - git config user.email "bailv2019@hotmail.com"
-  - git add .
-  - git commit -m "Site update"
-  - git push --force --quiet "https://${ACESS_TOKEN}@github.com/bailv/bailv.github.io" master:master
+  - sed -i "s/access_token/${ACCESS_TOKEN}/g" ./config.yml
+  - hexo d
 
 branches:
   only:
