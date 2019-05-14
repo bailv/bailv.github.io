@@ -211,7 +211,7 @@ disqus:
 gitalk:
   enable: true
   client_id: '748d9bebd8f89c940326'
-  client_secret: '90e4c408337c19b0b05dfd3f9d110e6184da9e7a'
+  client_secret: '620142cd73e7a1a9aad885b04f6f39f309b9222c'
   repo: 'bailv.github.io'
   owner: 'bailv'
   admin: ['bailv']
