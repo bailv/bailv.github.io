@@ -214,7 +214,7 @@ gitalk:
   client_secret: '620142cd73e7a1a9aad885b04f6f39f309b9222c'
   repo: 'bailv.github.io'
   owner: 'bailv'
-  admin: ['bailv']
+  admin: ['bailv', 'clanaid']
 
 # valine comment system. https://valine.js.org
 # valine:
