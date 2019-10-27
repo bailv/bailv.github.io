@@ -1,0 +1,28 @@
+name: build and deploy hexo
+on:
+  push:
+    branches:
+      - blog
+
+jobs:
+  build-and-generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Clone hexo-theme-melody
+        run: git clone -b master https://github.com/Molunerfinn/hexo-theme-melody themes/melody
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Install hexo-cli
+        run: npm install -g hexo-cli
+      - name: Install Dependencies
+        run: npm install
+      - name: Generate
+        run: hexo g
+      - run: git config user.name "bailv"
+      - run: git config user.email "bailv2019@hotmail.com"
+      - run: sed -i "s/access_token/${{secrets.GIT_ACCESS_TOKEN}}/g" ./_config.yml
+      - name: hexo deploy
+        run: hexo d
