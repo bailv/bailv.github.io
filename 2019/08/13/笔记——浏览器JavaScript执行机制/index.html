@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="zh-Hans"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="笔记——浏览器JavaScript执行机制"><meta name="keywords" content="笔记,前端"><meta name="author" content="Bailv"><meta name="copyright" content="Bailv"><title>笔记——浏览器JavaScript执行机制 | 百虑Bailv</title><link rel="shortcut icon" href="/melody-favicon.ico"><link rel="stylesheet" href="/css/index.css?version=1.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.7.0"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/gitalk/dist/gitalk.min.css"><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js"></script><script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script><link rel="dns-prefetch" href="https://www.google-analytics.com"><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-106496325-1', 'auto');
+ga('send', 'pageview');</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  }
+} </script></head><body><canvas class="fireworks"></canvas><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="切换文章详情">切换站点概览</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#单线程的-JavaScript"><span class="toc-number">1.</span> <span class="toc-text">单线程的 JavaScript</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#任务队列"><span class="toc-number">2.</span> <span class="toc-text">任务队列</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JavaScript-中将任务分为两种"><span class="toc-number">2.1.</span> <span class="toc-text">JavaScript 中将任务分为两种</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#同步任务"><span class="toc-number">2.1.1.</span> <span class="toc-text">同步任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#异步任务"><span class="toc-number">2.1.2.</span> <span class="toc-text">异步任务</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#任务规范"><span class="toc-number">2.2.</span> <span class="toc-text">任务规范</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Macro-Task"><span class="toc-number">2.2.1.</span> <span class="toc-text">Macro Task</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Micro-Task"><span class="toc-number">2.2.2.</span> <span class="toc-text">Micro Task</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Event-Loop"><span class="toc-number">3.</span> <span class="toc-text">Event Loop</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引用"><span class="toc-number">4.</span> <span class="toc-text">引用</span></a></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="/img/avatar.png"></div><div class="author-info__name text-center">Bailv</div><div class="author-info__description text-center">Bailv Study</div><div class="follow-button"><a href="https://github.com/bailv">Start!</a></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/archives"><span class="pull-left">文章</span><span class="pull-right">9</span></a><a class="author-info-articles__tags article-meta" href="/tags"><span class="pull-left">标签</span><span class="pull-right">7</span></a><a class="author-info-articles__categories article-meta" href="/categories"><span class="pull-left">分类</span><span class="pull-right">6</span></a></div></div></div><div id="content-outer"><div class="no-bg" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/">百虑Bailv</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/">Home</a><a class="site-page" href="/archives">Archives</a><a class="site-page" href="/tags">Tags</a><a class="site-page" href="/categories">Categories</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> 搜索</span></a></span></div><div id="post-info"><div id="post-title">笔记——浏览器JavaScript执行机制</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2019-08-13</time><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/javascript/">javascript</a><div class="post-meta-wordcount"><span>字数总计: </span><span class="word-count">1.4k</span><span class="post-meta__separator">|</span><span>阅读时长: 4 分钟</span></div></div></div></div><div class="layout" id="content-inner"><article id="post"><div class="article-container" id="post-content"><h2 id="单线程的-JavaScript"><a href="#单线程的-JavaScript" class="headerlink" title="单线程的 JavaScript"></a>单线程的 JavaScript</h2><p>JS 被设计为单线程运行的，这是因为 JS 主要用来实现很多交互相关的操作，如 DOM 相关操作，如果是多线程会造成复杂的同步问题。</p>
+<p>因此浏览器在运行时只开启了一个 JS 引擎线程来解析和执行 JS。那为什么只有一个引擎呢？如果同时有两个线程去操作 DOM，浏览器是不是又要不知所措了。</p>
+<blockquote>
+<p>JS 引擎可以说是 JS 虚拟机，负责 JS 代码的解析和执行。通常包括以下几个步骤：</p>
+<ul>
+<li>词法分析：将源代码分解为有意义的分词</li>
+<li>语法分析：用语法分析器将分词解析成语法树</li>
+<li>代码生成：生成机器能运行的代码</li>
+<li>代码执行</li>
+</ul>
+</blockquote>
+<p>虽然 JavaScript 是单线程的，可是浏览器内部不是单线程的。你的一些 I/O 操作、定时器的计时和事件监听（click, keydown…）等都是由浏览器提供的其他线程来完成的。</p>
+<blockquote>
+<p>一个浏览器通常由以下几个常驻的线程</p>
+<ul>
+<li>渲染引擎线程：顾名思义，该线程负责页面的渲染</li>
+<li>JS 引擎线程：负责 JS 的解析和执行</li>
+<li>定时触发器线程：处理定时事件，比如 setTimeout, setInterval</li>
+<li>事件触发线程：处理 DOM 事件</li>
+<li>异步 http 请求线程：处理 http 请求</li>
+</ul>
+</blockquote>
+<h2 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h2><p>单线程就意味着，所有任务需要排队。任务队列中，前一个任务结束，才会执行后一个任务。如果前一个任务耗时很长，后一个任务就不得不一直等着。因此一些耗时的操作如 I/O，http 请求等任务可以先挂起，主线程先运行排在后面的任务。等到 IO 设备返回了结果，再回过头，把挂起的任务继续执行下去。</p>
+<h3 id="JavaScript-中将任务分为两种"><a href="#JavaScript-中将任务分为两种" class="headerlink" title="JavaScript 中将任务分为两种"></a>JavaScript 中将任务分为两种</h3><h4 id="同步任务"><a href="#同步任务" class="headerlink" title="同步任务"></a>同步任务</h4><p>在主线程上排队执行的任务，只有前一个任务执行完毕，才能执行后一个任务</p>
+<h4 id="异步任务"><a href="#异步任务" class="headerlink" title="异步任务"></a>异步任务</h4><p>不进入主线程、而进入”任务队列”（task queue）的任务，只有”任务队列”通知主线程，某个异步任务可以执行了，该任务才会进入主线程执行。异步执行的运行机制如下：</p>
+<ol>
+<li>所有同步任务都在主线程上执行，形成一个<strong>执行栈</strong>（execution context stack）。</li>
+<li>主线程之外，还存在一个”任务队列”（task queue）。只要异步任务有了运行结果，就在”任务队列”之中放置一个事件</li>
+<li>一旦”执行栈”中的所有同步任务执行完毕，系统就会读取”任务队列”，看看里面有哪些事件。那些对应的异步任务，于是结束等待状态，进入执行栈，开始执行。</li>
+<li>主线程不断重复上面的第三步。</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/clanaid/pic_repository/master/img/bg2014100801.jpg" alt></p>
+<h3 id="任务规范"><a href="#任务规范" class="headerlink" title="任务规范"></a>任务规范</h3><p>在任务队列中存放的是一个个<code>任务(Task)</code>。规范中规定，<strong>Task 分为两大类, 分别是 Macro Task(宏任务) 和 Micro Task(微任务)</strong>，并且每个 Macro Task 结束后, 都要清空所有的 Micro Task. 其中 Micro Task 细分为两个队列——<code>Micro Task Queue</code>() 和 <code>Tick Task Queue</code>(专门用于存放 process.nextTick 的任务). <code>Tick Task</code>任务优先于<code>Micro Task</code>任务执行</p>
+<h4 id="Macro-Task"><a href="#Macro-Task" class="headerlink" title="Macro Task"></a>Macro Task</h4><p>每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）</p>
+<p>每一个 task 会从头到尾将这个任务执行完毕，不会执行其它<br>浏览器为了能够使得 JS 内部 task 与 DOM 任务能够有序的执行，会在一个 task 执行结束后，在下一个 task 执行开始前，对页面进行重新渲染</p>
+<p>包含：</p>
+<ul>
+<li>setImmediate</li>
+<li>setTimeout</li>
+<li>setInterval</li>
+</ul>
+<h4 id="Micro-Task"><a href="#Micro-Task" class="headerlink" title="Micro Task"></a>Micro Task</h4><p>所有微任务都是添加到微任务队列（Job Queues）中，等待当前 macrotask 执行完毕后执行，而这个队列由 JS 引擎线程维护</p>
+<p>包含：</p>
+<ul>
+<li>process.nextTick</li>
+<li>Promise</li>
+<li>Object.observe</li>
+<li>MutaionObserver</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/clanaid/pic_repository/master/img/20190813164356.png" alt></p>
+<h2 id="Event-Loop"><a href="#Event-Loop" class="headerlink" title="Event Loop"></a>Event Loop</h2><p>从上述任务队列中可以知道，主线程从任务队列中读取任务是不断循环的，每次栈被清空后，都会在消息队列中读取新的任务，如果没有新的任务，就会等待，直到有新的任务，这一机制称为<strong>事件循环</strong>。</p>
+<p>主线程运行的时候，产生<code>堆（heap）</code>和<code>栈（stack）</code>。</p>
+<p>栈存放大量的同步任务，同时如变量和函数的初始化、事件的绑定等等那些不需要回调函数的操作都可归为这一类。</p>
+<p>堆用来存储声明的变量、对象。</p>
+<p>某个异步任务有了响应就会被推入 callback 队列中。如用户的点击事件、浏览器收到服务的响应和 setTimeout 中待执行的事件，每个异步任务都和回调函数相关联。</p>
+<p>主线程执行栈中的同步任务，当所有同步任务执行完毕后，栈被清空，然后读取消息队列中的一个待处理任务，并把相关回调函数压入栈中，单线程开始执行新的同步任务。</p>
+<p><img src="https://raw.githubusercontent.com/clanaid/pic_repository/master/img/20190813172912.png" alt></p>
+<p>执行流程如图所示：</p>
+<p><img src="https://raw.githubusercontent.com/clanaid/pic_repository/master/img/20190813171334.png" alt></p>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><p><strong>参考文章</strong></p>
+<p><a href="https://juejin.im/post/5a6ad46ef265da3e513352c8" target="_blank" rel="noopener">JavaScript 异步机制详解</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/33104163" target="_blank" rel="noopener">JavaScript 中的 JS 引擎的执行机制：探究 Event Loop</a></p>
+<p><a href="https://github.com/pramper/Blog/issues/4" target="_blank" rel="noopener">JavaScript 单线程和异步机制</a></p>
+<p><a href="http://www.ruanyifeng.com/blog/2014/10/event-loop.html" target="_blank" rel="noopener">JavaScript 运行机制详解：再谈 Event Loop</a></p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Bailv</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://bailv.github.io/2019/08/13/笔记——浏览器JavaScript执行机制/">https://bailv.github.io/2019/08/13/笔记——浏览器JavaScript执行机制/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://bailv.github.io">百虑Bailv</a>！</span></div></div><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/笔记/">笔记</a><a class="post-meta__tags" href="/tags/前端/">前端</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/2019/10/09/笔记-利用记忆化技术提升React性能/"><i class="fa fa-chevron-left">  </i><span>笔记:利用记忆化技术提升React性能</span></a></div><div class="next-post pull-right"><a href="/2019/06/12/React笔记——React Fragment/"><span>React笔记——React Fragment</span><i class="fa fa-chevron-right"></i></a></div></nav><div id="gitalk-container"></div><script>var gitalk = new Gitalk({
+  clientID: '748d9bebd8f89c940326',
+  clientSecret: '620142cd73e7a1a9aad885b04f6f39f309b9222c',
+  repo: 'bailv.github.io',
+  owner: 'bailv',
+  admin: 'bailv',
+  id: md5(decodeURI(location.pathname)),
+  language: 'zh-CN'
+})
+gitalk.render('gitalk-container')</script></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 - 2020 By Bailv</div><div class="framework-info"><span>驱动 - </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 - </span><a href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="footer_custom_text">欢迎加入打铁部队！！！！</div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file-o"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/js/utils.js?version=1.7.0"></script><script src="/js/fancybox.js?version=1.7.0"></script><script src="/js/sidebar.js?version=1.7.0"></script><script src="/js/copy.js?version=1.7.0"></script><script src="/js/fireworks.js?version=1.7.0"></script><script src="/js/transition.js?version=1.7.0"></script><script src="/js/scroll.js?version=1.7.0"></script><script src="/js/head.js?version=1.7.0"></script><script src="/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>
