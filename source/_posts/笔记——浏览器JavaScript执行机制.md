@@ -1,5 +1,5 @@
 ---
-title: '笔记——浏览器JavaScript执行机制'
+title: "笔记——浏览器JavaScript执行机制"
 date: 2019-08-13 18:17:01
 tags:
   - 笔记
@@ -44,7 +44,7 @@ JS 被设计为单线程运行的，这是因为 JS 主要用来实现很多交�
 
 不进入主线程、而进入"任务队列"（task queue）的任务，只有"任务队列"通知主线程，某个异步任务可以执行了，该任务才会进入主线程执行。异步执行的运行机制如下：
 
-1. 所有同步任务都在主线程上执行，形成一个++执行栈++（execution context stack）。
+1. 所有同步任务都在主线程上执行，形成一个**执行栈**（execution context stack）。
 2. 主线程之外，还存在一个"任务队列"（task queue）。只要异步任务有了运行结果，就在"任务队列"之中放置一个事件
 3. 一旦"执行栈"中的所有同步任务执行完毕，系统就会读取"任务队列"，看看里面有哪些事件。那些对应的异步任务，于是结束等待状态，进入执行栈，开始执行。
 4. 主线程不断重复上面的第三步。
@@ -53,7 +53,7 @@ JS 被设计为单线程运行的，这是因为 JS 主要用来实现很多交�
 
 ### 任务规范
 
-在任务队列中存放的是一个个`任务(Task)`。规范中规定，**Task 分为两大类, 分别是 Macro Task(宏任务) 和 Micro Task(微任务)**，并且每个 Macro Task 结束后, 都要清空所有的 Micro Task.
+在任务队列中存放的是一个个`任务(Task)`。规范中规定，**Task 分为两大类, 分别是 Macro Task(宏任务) 和 Micro Task(微任务)**，并且每个 Macro Task 结束后, 都要清空所有的 Micro Task. 其中 Micro Task 细分为两个队列——`Micro Task Queue`() 和 `Tick Task Queue`(专门用于存放 process.nextTick 的任务). `Tick Task`任务优先于`Micro Task`任务执行
 
 #### Macro Task
 
